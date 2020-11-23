@@ -9,7 +9,6 @@ L = 2;     % NLOS path nums
 N = Nx*Ny;
 
 d_BI = 50;
-%d_IU = (0.5-rand(K,1))*20+15*sqrt(15);
 cord = [(2*rand(K,1)-1)+4, 2*rand(K,1)-1]*10;
 for ii=1:K
     c_IU(ii,:) = cord(ii,:)-[40, 30];
@@ -33,7 +32,7 @@ SR1 = zeros(length(My),1);
 SR2 = zeros(length(My),1);
 SR_rand = zeros(length(My),1);
 
-%% plot9
+%% plot
 for mi=1:length(My)
 for test = 1:1
 
@@ -41,30 +40,17 @@ for test = 1:1
 G = BS_IRS(Mx,My(mi),Nx,Ny,L,d_BI);
 
 %% IRS-user channel matrix
-% H = IRS_user(Mx, My, K);
 H = FF_User(Mx,My(mi),K,d_IU);
 
 %% AO algorithm
-[ Sum_Rate, P, Theta ] = Opt_1( M(mi),N,K,P_max,sigma,H,G );
+[ Sum_Rate, P, Theta ] = Opt_func( M(mi),N,K,P_max,sigma,H,G );
 
 DisSumRate1 = DiscreteSum( 1,Theta,K,P,sigma,H,G );
 DisSumRate2 = DiscreteSum( 2,Theta,K,P,sigma,H,G );
 
 Sum_rand = RandSum( 0, M(mi),N,K,P_max,sigma,H,G );
 
-% figure(test);
-% %subplot(1,2,1);
-% plot(Sum_Rate, 'b--o');
-% %set(gca,'xtick',1:times);
-% xlabel('iterations'),ylabel('sum-rate');xlim([1, iter]);
-% grid on;
-%{
-subplot(1,2,2);
-plot(f4, 'r--x');
-%set(gca,'xtick',1:times);
-xlabel('iterations'),ylabel('f4');xlim([1, iter]);
-grid on;
-%}
+
 SR(mi) = SR(mi)+Sum_Rate;
 SR1(mi) = SR1(mi)+DisSumRate1;
 SR2(mi) = SR2(mi)+DisSumRate2;
