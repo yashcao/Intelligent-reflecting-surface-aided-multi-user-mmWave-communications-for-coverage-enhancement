@@ -1,8 +1,6 @@
-function [ Sum_Rate, P, Theta ] = Opt_1( M,N,K,P_max,sigma,H,G )
-%function [ SumRate, f4, Sum_dis, f5, iter, P, Theta ] = Opt_1( M,N,K,P_max,sigma,H,G )
-%OPT_1 ´Ë´¦ÏÔÊ¾ÓÐ¹Ø´Ëº¯ÊýµÄÕªÒª
-%% init
+function [ Sum_Rate, P, Theta ] = Opt_func( M,N,K,P_max,sigma,H,G )
 
+%% init
 Phi = diag(exp(1j*(rand(M, 1)*2*pi))); % phase shifters
 
 %P = randn(N, K) + 1i*randn(N, K);
@@ -10,20 +8,15 @@ Phi = diag(exp(1j*(rand(M, 1)*2*pi))); % phase shifters
 H_all = H'*Phi*G;
 P = H_all'*inv(H_all*H_all');
 P = P/norm(P,'fro'); 
-% P = H_all';
-% P = inv(H_all'*H_all+(sigma*K/P_max)*eye(N))*H_all';
-% P = inv(H_all'*H_all)*H_all';
 
 SumRate = [];
-%loop = 0;
 iter = 0;
 
 
 %% Iterations UPDATE
-%for iter=1:times
 while(1)
 iter = iter+1;
-% disp('iter:');fprintf('%c', 8);% É¾µô»»ÐÐ·û
+% disp('iter:');fprintf('%c', 8);% åˆ æŽ‰æ¢è¡Œç¬¦
 % disp(iter);
 
 
@@ -42,7 +35,6 @@ for k=1:K
         end
         IN_temp = H_all(k,:)*P(:,j);
         IN_gain = IN_gain + abs(IN_temp)^2;
-        %IN_gain = IN_gain + IN_gain;
     end
     Alpha(k) = S_gain/(IN_gain+sigma);
     sum_rate = sum_rate + log2(1+Alpha(k));
@@ -53,7 +45,6 @@ SumRate = [SumRate, sum_rate];
 
 
 Beta = zeros(K,1);
-%f_max = 0;
 
 for k=1:K
     S_gain1 = H_all(k,:)*P(:,k);
@@ -61,10 +52,8 @@ for k=1:K
     for j=1:K
         IN_temp1 = H_all(k,:)*P(:,j);
         IN_gain1 = IN_gain1 + abs(IN_temp1)^2;
-        %IN_gain1 = IN_gain1 + real(h_12(k,:)*(P(:,j)*P(:,j)')*h_12(k,:)');
     end
     Beta(k) = sqrt(1+Alpha(k))*S_gain1/(IN_gain1+sigma);
-    %f_max = f_max+2*sqrt(1+Alpha(k))*real(conj(Beta(k,:))*S_gain1)-Beta(k,:)'*Beta(k,:)*(IN_gain1+sigma);
 end
 
 
@@ -80,11 +69,9 @@ tolerance = 1e-5;
 dual_v = Bisection(power, low, high, tolerance);
 
 P = inv(dual_v*eye(N)+T)*H_all'*mu;
-% P = H_all'*inv(H_all*H_all');
-%P = P/norm(P,'fro'); 
+
 
 Theta = conj(diag(Phi));
-%Theta = reshape(Phi,[],1);
 
 
 V = cell(K,K);
@@ -92,7 +79,6 @@ for k=1:K
     v0 = diag(H(:,k)')*G;
     for j=1:K
         v = v0*P(:,j);
-        %v = reshape(v,[],1); % vec
         V(k,j) = {v};
     end
 end
@@ -106,7 +92,6 @@ for k=1:K
     for j=1:K
         IN_temp2 = Theta'*V{k,j};
         IN_gain2 = IN_gain2 + abs(IN_temp2)^2;
-        %IN_gain2 = IN_gain2 + real(Theta'*(V{k,j}*V{k,j}')*Theta);
     end
     rho(k) = S_gain2/(IN_gain2+sigma);
 end
@@ -120,13 +105,6 @@ for k=1:K
     %C = C + abs(rho(k))^2*sigma;
 end
 
-%-Theta'*A*Theta
-
-% if(A==A') 
-%     fprintf('ÊÇ¶Ô³Æ¾ØÕó\n');
-% else
-%     fprintf('²»ÊÇ¶Ô³Æ¾ØÕó\n');
-% end
 
 
 cvx_begin sdp quiet
@@ -141,13 +119,12 @@ cvx_begin sdp quiet
             b'   -f_SDP] >= 0;
 cvx_end
 
-% xxx = inv(A+diag(zeta))*(b*b')*inv(A+diag(zeta));
-% diag(xxx)
+
 Theta_opt = inv(A + diag(zeta))*b;
 
-% Á¬ÐøµÈ·ù¶ÈÍ¶Ó°
+% è¿žç»­ç­‰å¹…åº¦æŠ•å½±
 Theta_opt = exp(1i*angle(Theta_opt));
-% ÀëÉ¢µÈ·ù¶ÈÍ¶Ó°
+% ç¦»æ•£ç­‰å¹…åº¦æŠ•å½±
 % bit = 1;
 % Theta_opt1 = Discerete(bit, Theta_opt);
 % bit = 2;
@@ -158,30 +135,11 @@ Theta_opt = exp(1i*angle(Theta_opt));
 
 
 Phi = diag(Theta_opt');
-% Phi = diag(Theta);
-
 
 
 H_all = H'*Phi*G;
-% P = H_all'*inv(H_all*H_all');
-% P = H_all';
-% P = P/norm(P,'fro'); 
 
 
-% if converge
-% if iter >= 3
-%     diff = SumRate(iter) - SumRate(iter-1);
-%     if abs(diff) <= 0.01
-%         loop = loop+1;
-%         
-%         if loop >= 5
-%             Sum_Rate = SumRate(end);
-%             break;
-%         end
-%     else
-%         loop = 0;
-%     end
-% end
 
 %% if converge
 if iter >= 3
