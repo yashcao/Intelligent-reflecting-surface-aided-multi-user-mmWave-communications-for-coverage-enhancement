@@ -34,7 +34,7 @@ SR_rand = zeros(length(My),1);
 
 %% plot
 for mi=1:length(My)
-for test = 1:1
+for test = 1:1000
 
 %% BS-IRS channel matrix
 G = BS_IRS(Mx,My(mi),Nx,Ny,L,d_BI);
