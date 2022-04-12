@@ -12,6 +12,8 @@
   booktitle={2020 IEEE 31st Annual International Symposium on Personal, Indoor and Mobile Radio Communications}, 
   title={Intelligent Reflecting Surface Aided Multi-User mmWave Communications for Coverage Enhancement}, 
   year={2020},
+  month={Aug.},
+  address={London, UK},
   volume={},
   number={},
   pages={1-6},
